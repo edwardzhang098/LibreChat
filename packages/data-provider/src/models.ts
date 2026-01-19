@@ -7,6 +7,7 @@ import {
   AuthType,
   authTypeSchema,
 } from './schemas';
+import type { TModelValue } from './types';
 
 export type TModelSpec = {
   name: string;
@@ -42,3 +43,13 @@ export const specsConfigSchema = z.object({
 });
 
 export type TSpecsConfig = z.infer<typeof specsConfigSchema>;
+
+export const getModelName = (model: TModelValue): string => {
+  return typeof model === 'string' ? model : model.name;
+};
+
+export const getModelDescription = (model: TModelValue): string | undefined => {
+  return typeof model === 'string' ? undefined : model.description;
+};
+
+export const toModelIds = (models: TModelValue[] = []): string[] => models.map(getModelName);

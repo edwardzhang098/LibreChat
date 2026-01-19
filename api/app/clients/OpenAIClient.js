@@ -25,6 +25,7 @@ const {
   getResponseSender,
   validateVisionModel,
   mapModelToAzureConfig,
+  getModelName,
 } = require('librechat-data-provider');
 const {
   truncateText,
@@ -239,7 +240,9 @@ class OpenAIClient extends BaseClient {
     }
 
     const availableModels = this.options.modelsConfig?.[this.options.endpoint];
-    if (!availableModels) {
+    const availableModelNames = availableModels?.map((model) => getModelName(model));
+
+    if (!availableModelNames) {
       return;
     }
 
@@ -254,14 +257,17 @@ class OpenAIClient extends BaseClient {
       return;
     }
 
-    this.isVisionModel = validateVisionModel({ model: this.modelOptions.model, availableModels });
+    this.isVisionModel = validateVisionModel({
+      model: this.modelOptions.model,
+      availableModels: availableModelNames,
+    });
     if (this.isVisionModel) {
       delete this.modelOptions.stop;
       return;
     }
 
-    for (const model of availableModels) {
-      if (!validateVisionModel({ model, availableModels })) {
+    for (const model of availableModelNames) {
+      if (!validateVisionModel({ model, availableModels: availableModelNames })) {
         continue;
       }
       this.modelOptions.model = model;
@@ -270,10 +276,15 @@ class OpenAIClient extends BaseClient {
       return;
     }
 
-    if (!availableModels.includes(this.defaultVisionModel)) {
+    if (!availableModelNames.includes(this.defaultVisionModel)) {
       return;
     }
-    if (!validateVisionModel({ model: this.defaultVisionModel, availableModels })) {
+    if (
+      !validateVisionModel({
+        model: this.defaultVisionModel,
+        availableModels: availableModelNames,
+      })
+    ) {
       return;
     }
 

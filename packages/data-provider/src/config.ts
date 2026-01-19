@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { ZodError } from 'zod';
 import type { TModelsConfig } from './types';
 import { EModelEndpoint, eModelEndpointSchema } from './schemas';
-import { specsConfigSchema, TSpecsConfig } from './models';
+import { specsConfigSchema, TSpecsConfig, getModelName } from './models';
 import { fileConfigSchema } from './file-config';
 import { FileSources } from './types/files';
 import { MCPServersSchema } from './mcp';
@@ -109,10 +109,19 @@ export const modelConfigSchema = z
     deploymentName: z.string().optional(),
     version: z.string().optional(),
     assistants: z.boolean().optional(),
+    description: z.string().optional(),
   })
   .or(z.boolean());
 
 export type TAzureModelConfig = z.infer<typeof modelConfigSchema>;
+
+const modelNameSchema = z.union([
+  z.string(),
+  z.object({
+    name: z.string(),
+    description: z.string().optional(),
+  }),
+]);
 
 export const azureBaseSchema = z.object({
   apiKey: z.string(),
@@ -237,7 +246,7 @@ export const assistantEndpointSchema = baseEndpointSchema.merge(
     apiKey: z.string().optional(),
     models: z
       .object({
-        default: z.array(z.string()).min(1),
+        default: z.array(modelNameSchema).min(1),
         fetch: z.boolean().optional(),
         userIdQuery: z.boolean().optional(),
       })
@@ -297,7 +306,7 @@ export const endpointSchema = baseEndpointSchema.merge(
     apiKey: z.string(),
     baseURL: z.string(),
     models: z.object({
-      default: z.array(z.string()).min(1),
+      default: z.array(modelNameSchema).min(1),
       fetch: z.boolean().optional(),
       userIdQuery: z.boolean().optional(),
     }),
@@ -1138,7 +1147,7 @@ export function validateVisionModel({
 }: {
   model: string;
   additionalModels?: string[];
-  availableModels?: string[];
+  availableModels?: Array<string | { name: string; description?: string }>;
 }) {
   if (!model) {
     return false;
@@ -1148,7 +1157,9 @@ export function validateVisionModel({
     return false;
   }
 
-  if (availableModels && !availableModels.includes(model)) {
+  const availableModelNames = availableModels?.map(getModelName);
+
+  if (availableModelNames && !availableModelNames.includes(model)) {
     return false;
   }
 

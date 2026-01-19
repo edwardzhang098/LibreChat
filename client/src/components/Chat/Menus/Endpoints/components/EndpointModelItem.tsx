@@ -6,15 +6,17 @@ import { useModelSelectorContext } from '../ModelSelectorContext';
 import { CustomMenuItem as MenuItem } from '../CustomMenu';
 
 interface EndpointModelItemProps {
-  modelId: string | null;
+  model: { name: string; description?: string; isGlobal?: boolean } | null;
   endpoint: Endpoint;
   isSelected: boolean;
 }
 
-export function EndpointModelItem({ modelId, endpoint, isSelected }: EndpointModelItemProps) {
+export function EndpointModelItem({ model, endpoint, isSelected }: EndpointModelItemProps) {
   const { handleSelectModel } = useModelSelectorContext();
+  const modelId = model?.name ?? null;
   let isGlobal = false;
   let modelName = modelId;
+  const modelDescription = model?.description;
   const avatarUrl = endpoint?.modelIcons?.[modelId ?? ''] || null;
 
   // Use custom names if available
@@ -22,7 +24,7 @@ export function EndpointModelItem({ modelId, endpoint, isSelected }: EndpointMod
     modelName = endpoint.agentNames[modelId];
 
     const modelInfo = endpoint?.models?.find((m) => m.name === modelId);
-    isGlobal = modelInfo?.isGlobal ?? false;
+    isGlobal = model?.isGlobal ?? modelInfo?.isGlobal ?? false;
   } else if (
     endpoint &&
     modelId &&
@@ -36,9 +38,9 @@ export function EndpointModelItem({ modelId, endpoint, isSelected }: EndpointMod
     <MenuItem
       key={modelId}
       onClick={() => handleSelectModel(endpoint, modelId ?? '')}
-      className="flex h-8 w-full cursor-pointer items-center justify-start rounded-lg px-3 py-2 text-sm"
+      className="flex w-full cursor-pointer items-start justify-start gap-3 rounded-lg px-3 py-3 text-sm"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-3">
         {avatarUrl ? (
           <div className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full">
             <img src={avatarUrl} alt={modelName ?? ''} className="h-full w-full object-cover" />
@@ -49,7 +51,12 @@ export function EndpointModelItem({ modelId, endpoint, isSelected }: EndpointMod
             {endpoint.icon}
           </div>
         ) : null}
-        <span>{modelName}</span>
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="truncate">{modelName}</span>
+          {modelDescription && (
+            <span className="text-xs text-text-secondary line-clamp-2 break-words">{modelDescription}</span>
+          )}
+        </div>
       </div>
       {isGlobal && <EarthIcon className="ml-auto size-4 text-green-400" />}
       {isSelected && (
@@ -75,20 +82,22 @@ export function EndpointModelItem({ modelId, endpoint, isSelected }: EndpointMod
 
 export function renderEndpointModels(
   endpoint: Endpoint | null,
-  models: Array<{ name: string; isGlobal?: boolean }>,
+  models: Array<{ name: string; description?: string; isGlobal?: boolean }>,
   selectedModel: string | null,
   filteredModels?: string[],
 ) {
-  const modelsToRender = filteredModels || models.map((model) => model.name);
+  const modelsToRender = filteredModels
+    ? models.filter((model) => filteredModels.includes(model.name))
+    : models;
 
   return modelsToRender.map(
-    (modelId) =>
+    (modelEntry) =>
       endpoint && (
         <EndpointModelItem
-          key={modelId}
-          modelId={modelId}
+          key={modelEntry.name}
+          model={modelEntry}
           endpoint={endpoint}
-          isSelected={selectedModel === modelId}
+          isSelected={selectedModel === modelEntry.name}
         />
       ),
   );

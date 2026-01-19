@@ -9,6 +9,7 @@ import {
   isAgentsEndpoint,
   getConfigDefaults,
   isAssistantsEndpoint,
+  toModelIds,
 } from 'librechat-data-provider';
 import type { TAssistantsMap, TEndpointsConfig } from 'librechat-data-provider';
 import type { MentionOption } from '~/common';
@@ -165,7 +166,7 @@ export default function useMentions({
         return [];
       }
 
-      const models = (modelsConfig?.[endpoint] ?? []).map((model) => ({
+      const models = toModelIds(modelsConfig?.[endpoint] ?? []).map((model) => ({
         value: endpoint,
         label: model,
         type: 'model' as const,

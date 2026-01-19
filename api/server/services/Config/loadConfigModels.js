@@ -13,20 +13,55 @@ async function loadConfigModels(req) {
   if (!appConfig) {
     return {};
   }
+
+  const formatModelEntry = (model) => {
+    if (!model) {
+      return null;
+    }
+    if (typeof model === 'string') {
+      return model;
+    }
+    if (typeof model === 'object' && model.name) {
+      const { name, description } = model;
+      return description ? { name, description } : name;
+    }
+    return null;
+  };
+
   const modelsConfig = {};
   const azureConfig = appConfig.endpoints?.[EModelEndpoint.azureOpenAI];
   const { modelNames } = azureConfig ?? {};
+  const azureModelDescriptions = {};
+
+  if (azureConfig?.groupMap) {
+    for (const [, group] of Object.entries(azureConfig.groupMap)) {
+      const models = group?.models ?? {};
+      for (const [modelName, modelConfig] of Object.entries(models)) {
+        if (modelConfig && typeof modelConfig === 'object' && !Array.isArray(modelConfig)) {
+          if (modelConfig.description) {
+            azureModelDescriptions[modelName] = modelConfig.description;
+          }
+        }
+      }
+    }
+  }
 
   if (modelNames && azureConfig) {
-    modelsConfig[EModelEndpoint.azureOpenAI] = modelNames;
+    modelsConfig[EModelEndpoint.azureOpenAI] = modelNames.map((name) => {
+      const description = azureModelDescriptions[name];
+      return description ? { name, description } : name;
+    });
   }
 
   if (modelNames && azureConfig && azureConfig.plugins) {
-    modelsConfig[EModelEndpoint.gptPlugins] = modelNames;
+    modelsConfig[EModelEndpoint.gptPlugins] = modelsConfig[EModelEndpoint.azureOpenAI];
   }
 
   if (azureConfig?.assistants && azureConfig.assistantModels) {
-    modelsConfig[EModelEndpoint.azureAssistants] = azureConfig.assistantModels;
+    modelsConfig[EModelEndpoint.azureAssistants] = azureConfig.assistantModels.map((name) => {
+      const description = azureModelDescriptions[name];
+      return description ? { name, description } : name;
+    });
   }
 
   if (!Array.isArray(appConfig.endpoints?.[EModelEndpoint.custom])) {
@@ -85,7 +120,9 @@ async function loadConfigModels(req) {
     }
 
     if (Array.isArray(models.default)) {
-      modelsConfig[name] = models.default;
+      modelsConfig[name] = models.default
+        .map((model) => formatModelEntry(model))
+        .filter(Boolean);
     }
   }
 
@@ -99,7 +136,13 @@ async function loadConfigModels(req) {
 
     for (const name of associatedNames) {
       const endpoint = endpointsMap[name];
-      modelsConfig[name] = !modelData?.length ? (endpoint.models.default ?? []) : modelData;
+      const defaultModels = (endpoint.models.default ?? [])
+        .map((model) => formatModelEntry(model))
+        .filter(Boolean);
+      const fetchedModels = (modelData ?? [])
+        .map((model) => formatModelEntry(model))
+        .filter(Boolean);
+      modelsConfig[name] = fetchedModels.length ? fetchedModels : defaultModels;
     }
   }
 

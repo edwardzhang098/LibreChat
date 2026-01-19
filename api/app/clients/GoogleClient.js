@@ -19,6 +19,7 @@ const {
   ErrorTypes,
   Constants,
   AuthKeys,
+  getModelName,
 } = require('librechat-data-provider');
 const { encodeAndFormat } = require('~/server/services/Files/images');
 const { spendTokens } = require('~/models/spendTokens');
@@ -215,12 +216,17 @@ class GoogleClient extends BaseClient {
         ? this.modelOptions.model
         : 'gemini-pro-vision');
     const availableModels = this.options.modelsConfig?.[EModelEndpoint.google];
-    this.isVisionModel = validateVisionModel({ model: this.modelOptions.model, availableModels });
+    const availableModelNames = availableModels?.map((model) => getModelName(model));
+
+    this.isVisionModel = validateVisionModel({
+      model: this.modelOptions.model,
+      availableModels: availableModelNames,
+    });
 
     if (
       attachments &&
       attachments.some((file) => file?.type && file?.type?.includes('image')) &&
-      availableModels?.includes(this.defaultVisionModel) &&
+      availableModelNames?.includes(this.defaultVisionModel) &&
       !this.isVisionModel
     ) {
       this.modelOptions.model = this.defaultVisionModel;

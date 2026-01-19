@@ -16,7 +16,7 @@ export function filterItems<
     label: string;
     name?: string;
     value?: string;
-    models?: Array<{ name: string; isGlobal?: boolean }>;
+    models?: Array<{ name: string; description?: string; isGlobal?: boolean }>;
   },
 >(
   items: T[],
@@ -41,7 +41,10 @@ export function filterItems<
 
     if (item.models && item.models.length > 0) {
       return item.models.some((modelId) => {
-        if (modelId.name.toLowerCase().includes(searchTermLower)) {
+        if (
+          modelId.name.toLowerCase().includes(searchTermLower) ||
+          (modelId.description && modelId.description.toLowerCase().includes(searchTermLower))
+        ) {
           return true;
         }
 
@@ -69,33 +72,40 @@ export function filterItems<
 
 export function filterModels(
   endpoint: Endpoint,
-  models: string[],
+  models: Array<{ name: string; description?: string }>,
   searchValue: string,
   agentsMap: TAgentsMap | undefined,
   assistantsMap: TAssistantsMap | undefined,
 ): string[] {
   const searchTermLower = searchValue.trim().toLowerCase();
   if (!searchTermLower) {
-    return models;
+    return models.map((model) => model.name);
   }
 
-  return models.filter((modelId) => {
-    let modelName = modelId;
+  return models
+    .filter((modelEntry) => {
+      let modelName = modelEntry.name;
 
-    if (isAgentsEndpoint(endpoint.value) && agentsMap && agentsMap[modelId]) {
-      modelName = agentsMap[modelId]?.name || modelId;
-    } else if (
-      isAssistantsEndpoint(endpoint.value) &&
-      assistantsMap &&
-      assistantsMap[endpoint.value]
-    ) {
-      const assistant = assistantsMap[endpoint.value][modelId];
-      modelName =
-        typeof assistant.name === 'string' && assistant.name ? (assistant.name as string) : modelId;
-    }
+      if (isAgentsEndpoint(endpoint.value) && agentsMap && agentsMap[modelEntry.name]) {
+        modelName = agentsMap[modelEntry.name]?.name || modelEntry.name;
+      } else if (
+        isAssistantsEndpoint(endpoint.value) &&
+        assistantsMap &&
+        assistantsMap[endpoint.value]
+      ) {
+        const assistant = assistantsMap[endpoint.value][modelEntry.name];
+        modelName =
+          typeof assistant?.name === 'string' && assistant.name
+            ? (assistant.name as string)
+            : modelEntry.name;
+      }
 
-    return modelName.toLowerCase().includes(searchTermLower);
-  });
+      return (
+        modelName.toLowerCase().includes(searchTermLower) ||
+        (modelEntry.description?.toLowerCase().includes(searchTermLower) ?? false)
+      );
+    })
+    .map((modelEntry) => modelEntry.name);
 }
 
 export function getSelectedIcon({

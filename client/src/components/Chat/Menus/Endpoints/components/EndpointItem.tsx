@@ -103,7 +103,7 @@ export function EndpointItem({ endpoint }: EndpointItemProps) {
     const filteredModels = searchValue
       ? filterModels(
           endpoint,
-          (endpoint.models || []).map((model) => model.name),
+          endpoint.models || [],
           searchValue,
           agentsMap,
           assistantsMap,

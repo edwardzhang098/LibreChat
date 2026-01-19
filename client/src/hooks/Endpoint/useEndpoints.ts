@@ -5,6 +5,8 @@ import {
   alternateName,
   EModelEndpoint,
   PermissionTypes,
+  getModelName,
+  getModelDescription,
 } from 'librechat-data-provider';
 import type {
   TEndpointsConfig,
@@ -170,7 +172,8 @@ export const useEndpoints = ({
         (modelsQuery.data?.[ep]?.length ?? 0) > 0
       ) {
         result.models = modelsQuery.data?.[ep]?.map((model) => ({
-          name: model,
+          name: getModelName(model),
+          description: getModelDescription(model),
           isGlobal: false,
         }));
       }

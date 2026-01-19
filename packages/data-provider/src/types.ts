@@ -355,7 +355,14 @@ export type TEndpointsConfig =
   | Record<EModelEndpoint | string, TConfig | null | undefined>
   | undefined;
 
-export type TModelsConfig = Record<string, string[]>;
+export type TModelInfo = {
+  name: string;
+  description?: string;
+};
+
+export type TModelValue = string | TModelInfo;
+
+export type TModelsConfig = Record<string, TModelValue[]>;
 
 export type TUpdateTokenCountResponse = {
   count: number;

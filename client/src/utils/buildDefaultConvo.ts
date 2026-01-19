@@ -3,8 +3,9 @@ import {
   EModelEndpoint,
   isAssistantsEndpoint,
   isAgentsEndpoint,
+  getModelName,
 } from 'librechat-data-provider';
-import type { TConversation, EndpointSchemaKey } from 'librechat-data-provider';
+import type { TConversation, EndpointSchemaKey, TModelValue } from 'librechat-data-provider';
 import { getLocalStorageItems } from './localStorage';
 
 const buildDefaultConvo = ({
@@ -13,7 +14,7 @@ const buildDefaultConvo = ({
   endpoint = null,
   lastConversationSetup,
 }: {
-  models: string[];
+  models: TModelValue[];
   conversation: TConversation;
   endpoint?: EModelEndpoint | null;
   lastConversationSetup: TConversation | null;
@@ -29,7 +30,7 @@ const buildDefaultConvo = ({
     };
   }
 
-  const availableModels = models;
+  const availableModels = models.map((model) => getModelName(model));
   const model = lastConversationSetup?.model ?? lastSelectedModel?.[endpoint] ?? '';
   const secondaryModel: string | null =
     endpoint === EModelEndpoint.gptPlugins

@@ -8,6 +8,7 @@ const {
   anthropicSettings,
   getResponseSender,
   validateVisionModel,
+  getModelName,
 } = require('librechat-data-provider');
 const { SplitStreamHandler: _Handler } = require('@librechat/agents');
 const {
@@ -277,9 +278,14 @@ class AnthropicClient extends BaseClient {
    */
   checkVisionRequest(attachments) {
     const availableModels = this.options.modelsConfig?.[EModelEndpoint.anthropic];
-    this.isVisionModel = validateVisionModel({ model: this.modelOptions.model, availableModels });
+    const availableModelNames = availableModels?.map((model) => getModelName(model));
 
-    const visionModelAvailable = availableModels?.includes(this.defaultVisionModel);
+    this.isVisionModel = validateVisionModel({
+      model: this.modelOptions.model,
+      availableModels: availableModelNames,
+    });
+
+    const visionModelAvailable = availableModelNames?.includes(this.defaultVisionModel);
     if (
       attachments &&
       attachments.some((file) => file?.type && file?.type?.includes('image')) &&

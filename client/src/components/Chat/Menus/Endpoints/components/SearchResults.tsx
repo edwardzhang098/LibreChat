@@ -116,7 +116,13 @@ export function SearchResults({ results, localize, searchValue }: SearchResultsP
                   ) {
                     modelName = endpoint.assistantNames[model.name];
                   }
-                  return modelName.toLowerCase().includes(lowerQuery);
+                  const descriptionMatch = model.description
+                    ?.toLowerCase()
+                    .includes(lowerQuery);
+
+                  return (
+                    modelName.toLowerCase().includes(lowerQuery) || descriptionMatch === true
+                  );
                 });
 
             if (!filteredModels.length) {
@@ -154,13 +160,15 @@ export function SearchResults({ results, localize, searchValue }: SearchResultsP
                     modelName = endpoint.assistantNames[modelId];
                   }
 
+                  isGlobal = model.isGlobal ?? isGlobal;
+
                   return (
                     <MenuItem
                       key={`${endpoint.value}-${modelId}-search-${i}`}
                       onClick={() => handleSelectModel(endpoint, modelId)}
                       className="flex w-full cursor-pointer items-center justify-start rounded-lg px-3 py-2 pl-6 text-sm"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
                         {endpoint.modelIcons?.[modelId] && (
                           <div className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full">
                             <img
@@ -170,7 +178,14 @@ export function SearchResults({ results, localize, searchValue }: SearchResultsP
                             />
                           </div>
                         )}
-                        <span>{modelName}</span>
+                        <div className="flex min-w-0 flex-col">
+                          <span className="truncate">{modelName}</span>
+                          {model.description && (
+                            <span className="text-xs text-text-secondary line-clamp-2 break-words">
+                              {model.description}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {isGlobal && <EarthIcon className="ml-auto size-4 text-green-400" />}
                       {selectedEndpoint === endpoint.value && selectedModel === modelId && (

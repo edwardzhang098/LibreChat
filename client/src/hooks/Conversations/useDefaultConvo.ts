@@ -1,4 +1,4 @@
-import { excludedKeys } from 'librechat-data-provider';
+import { excludedKeys, toModelIds } from 'librechat-data-provider';
 import { useGetModelsQuery } from 'librechat-data-provider/react-query';
 import type {
   TEndpointsConfig,
@@ -33,7 +33,7 @@ const useDefaultConvo = () => {
       endpointsConfig,
     });
 
-    const models = modelsConfig[endpoint ?? ''] || [];
+    const models = toModelIds(modelsConfig[endpoint ?? ''] || []);
     const conversation = { ..._convo };
     if (cleanInput === true) {
       for (const key in conversation) {

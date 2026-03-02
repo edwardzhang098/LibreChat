@@ -96,7 +96,7 @@ export async function updateInterfacePermissions({
   // 1. Explicit user configuration (from librechat.yaml)
   // 2. Role-specific defaults (from roleDefaults)
   // 3. Interface schema defaults (from interfaceSchema.default())
-  for (const roleName of [SystemRoles.USER, SystemRoles.ADMIN]) {
+  for (const roleName of Object.values(SystemRoles)) {
     const defaultPerms = roleDefaults[roleName]?.permissions;
 
     const existingRole = await getRoleByName(roleName);

@@ -11,7 +11,7 @@ export default function Footer({ className }: { className?: string }) {
 
   const privacyPolicy = config?.interface?.privacyPolicy;
   const termsOfService = config?.interface?.termsOfService;
-
+  const faq = config?.interface?.faq;
   const privacyPolicyRender = privacyPolicy?.externalUrl != null && (
     <a
       className="text-text-secondary underline"
@@ -34,13 +34,24 @@ export default function Footer({ className }: { className?: string }) {
     </a>
   );
 
+  const faqRender = faq?.externalUrl != null && (
+    <a
+      className="text-text-secondary underline"
+      href={faq.externalUrl}
+      target={faq.openNewTab === true ? '_blank' : undefined}
+      rel="noreferrer"
+    >
+      FAQ
+    </a>
+  );
+
   const mainContentParts = (
     typeof config?.customFooter === 'string'
       ? config.customFooter
       : '[LibreChat ' +
-        Constants.VERSION +
-        '](https://librechat.ai) - ' +
-        localize('com_ui_latest_footer')
+      Constants.VERSION +
+      '](https://librechat.ai) - ' +
+      localize('com_ui_latest_footer')
   ).split('|');
 
   useEffect(() => {
@@ -78,7 +89,7 @@ export default function Footer({ className }: { className?: string }) {
     </React.Fragment>
   ));
 
-  const footerElements = [...mainContentRender, privacyPolicyRender, termsOfServiceRender].filter(
+  const footerElements = [...mainContentRender, privacyPolicyRender, termsOfServiceRender, faqRender].filter(
     Boolean,
   );
 

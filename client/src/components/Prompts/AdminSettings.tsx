@@ -80,10 +80,16 @@ const AdminSettings = () => {
   const [selectedRole, setSelectedRole] = useState<SystemRoles>(SystemRoles.USER);
 
   const defaultValues = useMemo(() => {
-    if (roles?.[selectedRole]?.permissions) {
-      return roles[selectedRole]?.permissions[PermissionTypes.PROMPTS];
-    }
-    return roleDefaults[selectedRole].permissions[PermissionTypes.PROMPTS];
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.PROMPTS] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.PROMPTS] ?? {};
+
+    return {
+      [Permissions.SHARED_GLOBAL]: false,
+      [Permissions.CREATE]: false,
+      [Permissions.USE]: false,
+      ...base,
+      ...perms,
+    };
   }, [roles, selectedRole]);
 
   const {
@@ -99,7 +105,16 @@ const AdminSettings = () => {
   });
 
   useEffect(() => {
-    reset(roles?.[selectedRole]?.permissions?.[PermissionTypes.PROMPTS]);
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.PROMPTS] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.PROMPTS] ?? {};
+
+    reset({
+      [Permissions.SHARED_GLOBAL]: false,
+      [Permissions.CREATE]: false,
+      [Permissions.USE]: false,
+      ...base,
+      ...perms,
+    });
   }, [roles, selectedRole, reset]);
 
   if (user?.role !== SystemRoles.ADMIN) {
@@ -130,6 +145,12 @@ const AdminSettings = () => {
       label: SystemRoles.USER,
       onClick: () => {
         setSelectedRole(SystemRoles.USER);
+      },
+    },
+    {
+      label: SystemRoles.SHARER,
+      onClick: () => {
+        setSelectedRole(SystemRoles.SHARER);
       },
     },
     {

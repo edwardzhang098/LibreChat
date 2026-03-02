@@ -81,11 +81,14 @@ const MarketplaceAdminSettings = () => {
   const [selectedRole, setSelectedRole] = useState<SystemRoles>(SystemRoles.USER);
 
   const defaultValues = useMemo(() => {
-    const rolePerms = roles?.[selectedRole]?.permissions;
-    if (rolePerms) {
-      return rolePerms[PermissionTypes.MARKETPLACE];
-    }
-    return roleDefaults[selectedRole].permissions[PermissionTypes.MARKETPLACE];
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.MARKETPLACE] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.MARKETPLACE] ?? {};
+
+    return {
+      [Permissions.USE]: false,
+      ...base,
+      ...perms,
+    };
   }, [roles, selectedRole]);
 
   const {
@@ -101,12 +104,14 @@ const MarketplaceAdminSettings = () => {
   });
 
   useEffect(() => {
-    const value = roles?.[selectedRole]?.permissions?.[PermissionTypes.MARKETPLACE];
-    if (value) {
-      reset(value);
-    } else {
-      reset(roleDefaults[selectedRole].permissions[PermissionTypes.MARKETPLACE]);
-    }
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.MARKETPLACE] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.MARKETPLACE] ?? {};
+
+    reset({
+      [Permissions.USE]: false,
+      ...base,
+      ...perms,
+    });
   }, [roles, selectedRole, reset]);
 
   if (user?.role !== SystemRoles.ADMIN) {
@@ -132,6 +137,12 @@ const MarketplaceAdminSettings = () => {
       label: SystemRoles.USER,
       onClick: () => {
         setSelectedRole(SystemRoles.USER);
+      },
+    },
+    {
+      label: SystemRoles.SHARER,
+      onClick: () => {
+        setSelectedRole(SystemRoles.SHARER);
       },
     },
     {

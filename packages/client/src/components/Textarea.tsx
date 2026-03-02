@@ -6,7 +6,10 @@ import { cn } from '~/utils';
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className = '', ...props }, ref) => {
+  ({ className = '', placeholder, title, 'aria-label': ariaLabel, ...props }, ref) => {
+    const computedAriaLabel =
+      ariaLabel ?? (typeof placeholder === 'string' ? placeholder : undefined) ?? title;
+
     return (
       <textarea
         className={cn(
@@ -14,6 +17,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className,
         )}
         ref={ref}
+        aria-label={computedAriaLabel}
         {...props}
       />
     );

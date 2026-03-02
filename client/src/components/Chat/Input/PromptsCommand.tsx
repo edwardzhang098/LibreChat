@@ -70,6 +70,7 @@ function PromptsCommand({
     value: '',
     options: prompts ?? [],
   });
+  const commandPlaceholder = localize('com_ui_command_usage_placeholder');
 
   const handleSelect = useCallback(
     (mention?: PromptOption, e?: React.KeyboardEvent<HTMLInputElement>) => {
@@ -175,7 +176,8 @@ function PromptsCommand({
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             ref={inputRef}
-            placeholder={localize('com_ui_command_usage_placeholder')}
+            aria-label={commandPlaceholder}
+            placeholder={commandPlaceholder}
             className="mb-1 w-full border-0 bg-surface-tertiary-alt p-2 text-sm focus:outline-none dark:text-gray-200"
             autoComplete="off"
             value={searchValue}

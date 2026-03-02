@@ -5,10 +5,21 @@ import type { TextareaAutosizeProps } from 'react-textarea-autosize';
 import { chatDirectionAtom } from '~/store';
 
 export const TextareaAutosize = forwardRef<HTMLTextAreaElement, TextareaAutosizeProps>(
-  (props, ref) => {
+  ({ placeholder, title, 'aria-label': ariaLabel, ...props }, ref) => {
     const [, setIsRerendered] = useState(false);
     const chatDirection = useAtomValue(chatDirectionAtom).toLowerCase();
     useLayoutEffect(() => setIsRerendered(true), []);
-    return <ReactTextareaAutosize dir={chatDirection} {...props} ref={ref} />;
+    const computedAriaLabel =
+      ariaLabel ?? (typeof placeholder === 'string' ? placeholder : undefined) ?? title;
+
+    return (
+      <ReactTextareaAutosize
+        dir={chatDirection}
+        aria-label={computedAriaLabel}
+        placeholder={placeholder}
+        {...props}
+        ref={ref}
+      />
+    );
   },
 );

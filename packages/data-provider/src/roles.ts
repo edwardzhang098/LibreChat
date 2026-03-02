@@ -28,6 +28,10 @@ export enum SystemRoles {
    * The default user role
    */
   USER = 'USER',
+  /**
+   * Sharing-focused role
+   */
+  SHARER = 'SHARER',
 }
 
 export const roleSchema = z.object({
@@ -93,6 +97,10 @@ const defaultRolesSchema = z.object({
   }),
   [SystemRoles.USER]: roleSchema.extend({
     name: z.literal(SystemRoles.USER),
+    permissions: permissionsSchema,
+  }),
+  [SystemRoles.SHARER]: roleSchema.extend({
+    name: z.literal(SystemRoles.SHARER),
     permissions: permissionsSchema,
   }),
 });
@@ -170,6 +178,57 @@ export const roleDefaults = defaultRolesSchema.parse({
       },
       [PermissionTypes.FILE_SEARCH]: {},
       [PermissionTypes.FILE_CITATIONS]: {},
+    },
+  },
+  [SystemRoles.SHARER]: {
+    name: SystemRoles.SHARER,
+    permissions: {
+      [PermissionTypes.PROMPTS]: {
+        [Permissions.SHARED_GLOBAL]: false,
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: false,
+      },
+      [PermissionTypes.BOOKMARKS]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.MEMORIES]: {
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: false,
+        [Permissions.UPDATE]: false,
+        [Permissions.READ]: false,
+        [Permissions.OPT_OUT]: false,
+      },
+      [PermissionTypes.AGENTS]: {
+        [Permissions.SHARED_GLOBAL]: true,
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: false,
+      },
+      [PermissionTypes.MULTI_CONVO]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.TEMPORARY_CHAT]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.RUN_CODE]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.WEB_SEARCH]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.PEOPLE_PICKER]: {
+        [Permissions.VIEW_USERS]: false,
+        [Permissions.VIEW_GROUPS]: false,
+        [Permissions.VIEW_ROLES]: false,
+      },
+      [PermissionTypes.MARKETPLACE]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.FILE_SEARCH]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.FILE_CITATIONS]: {
+        [Permissions.USE]: false,
+      },
     },
   },
 });

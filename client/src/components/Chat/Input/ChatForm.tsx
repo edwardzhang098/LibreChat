@@ -17,6 +17,7 @@ import {
   useQueryParams,
   useSubmitMessage,
   useFocusChatEffect,
+  useLocalize,
 } from '~/hooks';
 import { mainTextareaId, BadgeItem } from '~/common';
 import AttachFileChat from './Files/AttachFileChat';
@@ -52,6 +53,7 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
   const maximizeChatSpace = useRecoilValue(store.maximizeChatSpace);
   const centerFormOnLanding = useRecoilValue(store.centerFormOnLanding);
   const isTemporary = useRecoilValue(store.isTemporary);
+  const localize = useLocalize();
 
   const [badges, setBadges] = useRecoilState(store.chatBadges);
   const [isEditingBadges, setIsEditingBadges] = useRecoilState(store.isEditingBadges);
@@ -192,6 +194,8 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
 
   const isMoreThanThreeRows = visualRowCount > 3;
 
+  const messageInputLabel = localize('com_ui_message_input_label') || 'Message input';
+
   const baseClasses = useMemo(
     () =>
       cn(
@@ -256,6 +260,9 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
             <FileFormChat conversation={conversation} />
             {endpoint && (
               <div className={cn('flex', isRTL ? 'flex-row-reverse' : 'flex-row')}>
+                <label htmlFor={mainTextareaId} className="sr-only">
+                  {messageInputLabel}
+                </label>
                 <TextareaAutosize
                   {...registerProps}
                   ref={(e) => {
@@ -263,6 +270,7 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
                     (textAreaRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = e;
                   }}
                   disabled={disableInputs || isNotAppendable}
+                  aria-label={messageInputLabel}
                   onPaste={handlePaste}
                   onKeyDown={handleKeyDown}
                   onKeyUp={handleKeyUp}

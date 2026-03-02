@@ -64,6 +64,23 @@ async function loadConfigModels(req) {
     });
   }
 
+  // Handle Anthropic endpoint models with descriptions
+  const anthropicConfig = appConfig.endpoints?.[EModelEndpoint.anthropic];
+  if (anthropicConfig?.models) {
+    const anthropicModels = [];
+    for (const [modelName, modelConfig] of Object.entries(anthropicConfig.models)) {
+      if (modelConfig && typeof modelConfig === 'object' && !Array.isArray(modelConfig)) {
+        const description = modelConfig.description;
+        anthropicModels.push(description ? { name: modelName, description } : modelName);
+      } else {
+        anthropicModels.push(modelName);
+      }
+    }
+    if (anthropicModels.length > 0) {
+      modelsConfig[EModelEndpoint.anthropic] = anthropicModels;
+    }
+  }
+
   if (!Array.isArray(appConfig.endpoints?.[EModelEndpoint.custom])) {
     return modelsConfig;
   }

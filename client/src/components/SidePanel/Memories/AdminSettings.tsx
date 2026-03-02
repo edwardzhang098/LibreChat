@@ -62,10 +62,18 @@ const AdminSettings = () => {
   const [selectedRole, setSelectedRole] = useState<SystemRoles>(SystemRoles.USER);
 
   const defaultValues = useMemo(() => {
-    if (roles?.[selectedRole]?.permissions) {
-      return roles?.[selectedRole]?.permissions?.[PermissionTypes.MEMORIES];
-    }
-    return roleDefaults[selectedRole].permissions[PermissionTypes.MEMORIES];
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.MEMORIES] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.MEMORIES] ?? {};
+
+    return {
+      [Permissions.USE]: false,
+      [Permissions.CREATE]: false,
+      [Permissions.UPDATE]: false,
+      [Permissions.READ]: false,
+      [Permissions.OPT_OUT]: false,
+      ...base,
+      ...perms,
+    };
   }, [roles, selectedRole]);
 
   const {
@@ -81,11 +89,18 @@ const AdminSettings = () => {
   });
 
   useEffect(() => {
-    if (roles?.[selectedRole]?.permissions?.[PermissionTypes.MEMORIES]) {
-      reset(roles?.[selectedRole]?.permissions?.[PermissionTypes.MEMORIES]);
-    } else {
-      reset(roleDefaults[selectedRole].permissions[PermissionTypes.MEMORIES]);
-    }
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.MEMORIES] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.MEMORIES] ?? {};
+
+    reset({
+      [Permissions.USE]: false,
+      [Permissions.CREATE]: false,
+      [Permissions.UPDATE]: false,
+      [Permissions.READ]: false,
+      [Permissions.OPT_OUT]: false,
+      ...base,
+      ...perms,
+    });
   }, [roles, selectedRole, reset]);
 
   if (user?.role !== SystemRoles.ADMIN) {
@@ -124,6 +139,12 @@ const AdminSettings = () => {
       label: SystemRoles.USER,
       onClick: () => {
         setSelectedRole(SystemRoles.USER);
+      },
+    },
+    {
+      label: SystemRoles.SHARER,
+      onClick: () => {
+        setSelectedRole(SystemRoles.SHARER);
       },
     },
     {

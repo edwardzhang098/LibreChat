@@ -528,6 +528,12 @@ export const interfaceSchema = z
         openNewTab: z.boolean().optional(),
       })
       .optional(),
+    faq: z
+      .object({
+        externalUrl: z.string().optional(),
+        openNewTab: z.boolean().optional(),
+      })
+      .optional(),
     termsOfService: termsOfServiceSchema.optional(),
     customWelcome: z.string().optional(),
     mcpServers: mcpServersSchema.optional(),

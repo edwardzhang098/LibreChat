@@ -83,11 +83,16 @@ const PeoplePickerAdminSettings = () => {
   const [selectedRole, setSelectedRole] = useState<SystemRoles>(SystemRoles.USER);
 
   const defaultValues = useMemo(() => {
-    const rolePerms = roles?.[selectedRole]?.permissions;
-    if (rolePerms) {
-      return rolePerms[PermissionTypes.PEOPLE_PICKER];
-    }
-    return roleDefaults[selectedRole].permissions[PermissionTypes.PEOPLE_PICKER];
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.PEOPLE_PICKER] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.PEOPLE_PICKER] ?? {};
+
+    return {
+      [Permissions.VIEW_USERS]: false,
+      [Permissions.VIEW_GROUPS]: false,
+      [Permissions.VIEW_ROLES]: false,
+      ...base,
+      ...perms,
+    };
   }, [roles, selectedRole]);
 
   const {
@@ -103,12 +108,16 @@ const PeoplePickerAdminSettings = () => {
   });
 
   useEffect(() => {
-    const value = roles?.[selectedRole]?.permissions?.[PermissionTypes.PEOPLE_PICKER];
-    if (value) {
-      reset(value);
-    } else {
-      reset(roleDefaults[selectedRole].permissions[PermissionTypes.PEOPLE_PICKER]);
-    }
+    const perms = roles?.[selectedRole]?.permissions?.[PermissionTypes.PEOPLE_PICKER] ?? {};
+    const base = roleDefaults[selectedRole].permissions[PermissionTypes.PEOPLE_PICKER] ?? {};
+
+    reset({
+      [Permissions.VIEW_USERS]: false,
+      [Permissions.VIEW_GROUPS]: false,
+      [Permissions.VIEW_ROLES]: false,
+      ...base,
+      ...perms,
+    });
   }, [roles, selectedRole, reset]);
 
   if (user?.role !== SystemRoles.ADMIN) {
@@ -142,6 +151,12 @@ const PeoplePickerAdminSettings = () => {
       label: SystemRoles.USER,
       onClick: () => {
         setSelectedRole(SystemRoles.USER);
+      },
+    },
+    {
+      label: SystemRoles.SHARER,
+      onClick: () => {
+        setSelectedRole(SystemRoles.SHARER);
       },
     },
     {

@@ -53,31 +53,39 @@ const ConversationStarters = () => {
     return documentsMap.get(entity?.id ?? '')?.conversation_starters ?? [];
   }, [documentsMap, isAgent, entity]);
 
+  const sanitizedConversationStarters = useMemo(
+    () =>
+      conversation_starters
+        .map((text) => (typeof text === 'string' ? text.trim() : ''))
+        .filter((text) => text.length > 0)
+        .slice(0, Constants.MAX_CONVO_STARTERS),
+    [conversation_starters],
+  );
+
   const { submitMessage } = useSubmitMessage();
   const sendConversationStarter = useCallback(
     (text: string) => submitMessage({ text }),
     [submitMessage],
   );
 
-  if (!conversation_starters.length) {
+  if (!sanitizedConversationStarters.length) {
     return null;
   }
 
   return (
     <div className="mt-8 flex flex-wrap justify-center gap-3 px-4">
-      {conversation_starters
-        .slice(0, Constants.MAX_CONVO_STARTERS)
-        .map((text: string, index: number) => (
-          <button
-            key={index}
-            onClick={() => sendConversationStarter(text)}
-            className="relative flex w-40 cursor-pointer flex-col gap-2 rounded-2xl border border-border-medium px-3 pb-4 pt-3 text-start align-top text-[15px] shadow-[0_0_2px_0_rgba(0,0,0,0.05),0_4px_6px_0_rgba(0,0,0,0.02)] transition-colors duration-300 ease-in-out fade-in hover:bg-surface-tertiary"
-          >
-            <p className="break-word line-clamp-3 overflow-hidden text-balance break-all text-text-secondary">
-              {text}
-            </p>
-          </button>
-        ))}
+      {sanitizedConversationStarters.map((text: string, index: number) => (
+        <button
+          key={index}
+          aria-label={text}
+          onClick={() => sendConversationStarter(text)}
+          className="relative flex w-40 cursor-pointer flex-col gap-2 rounded-2xl border border-border-medium px-3 pb-4 pt-3 text-start align-top text-[15px] shadow-[0_0_2px_0_rgba(0,0,0,0.05),0_4px_6px_0_rgba(0,0,0,0.02)] transition-colors duration-300 ease-in-out fade-in hover:bg-surface-tertiary"
+        >
+          <p className="break-word line-clamp-3 overflow-hidden text-balance break-all text-text-secondary">
+            {text}
+          </p>
+        </button>
+      ))}
     </div>
   );
 };

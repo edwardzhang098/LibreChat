@@ -3,7 +3,11 @@ import { cn } from '~/utils';
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, placeholder, title, 'aria-label': ariaLabel, ...props }, ref) => {
+    const computedAriaLabel =
+      ariaLabel ?? (typeof placeholder === 'string' ? placeholder : undefined) ?? title;
+
   return (
     <input
       className={cn(
@@ -11,11 +15,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, ...pr
         className ?? '',
       )}
       ref={ref}
+        aria-label={computedAriaLabel}
       {...props}
     />
   );
-});
-
+  },
+);
 Input.displayName = 'Input';
 
 export { Input };

@@ -6,6 +6,7 @@ import { loadDefaultInterface } from './interface';
 
 const mockUpdateAccessPermissions = jest.fn();
 const mockGetRoleByName = jest.fn();
+const systemRoles = Object.values(SystemRoles);
 
 describe('updateInterfacePermissions - permissions', () => {
   beforeEach(() => {
@@ -105,21 +106,12 @@ describe('updateInterfacePermissions - permissions', () => {
       [PermissionTypes.FILE_CITATIONS]: { [Permissions.USE]: true },
     };
 
-    expect(mockUpdateAccessPermissions).toHaveBeenCalledTimes(2);
+    expect(mockUpdateAccessPermissions).toHaveBeenCalledTimes(systemRoles.length);
 
-    // Check USER role call
-    expect(mockUpdateAccessPermissions).toHaveBeenCalledWith(
-      SystemRoles.USER,
-      expectedPermissionsForUser,
-      null,
-    );
-
-    // Check ADMIN role call
-    expect(mockUpdateAccessPermissions).toHaveBeenCalledWith(
-      SystemRoles.ADMIN,
-      expectedPermissionsForAdmin,
-      null,
-    );
+    for (const roleName of systemRoles) {
+      const expected = roleName === SystemRoles.ADMIN ? expectedPermissionsForAdmin : expectedPermissionsForUser;
+      expect(mockUpdateAccessPermissions).toHaveBeenCalledWith(roleName, expected, null);
+    }
   });
 
   it('should call updateAccessPermissions with false when permission types are false', async () => {
@@ -213,21 +205,12 @@ describe('updateInterfacePermissions - permissions', () => {
       [PermissionTypes.FILE_CITATIONS]: { [Permissions.USE]: false },
     };
 
-    expect(mockUpdateAccessPermissions).toHaveBeenCalledTimes(2);
+    expect(mockUpdateAccessPermissions).toHaveBeenCalledTimes(systemRoles.length);
 
-    // Check USER role call
-    expect(mockUpdateAccessPermissions).toHaveBeenCalledWith(
-      SystemRoles.USER,
-      expectedPermissionsForUser,
-      null,
-    );
-
-    // Check ADMIN role call
-    expect(mockUpdateAccessPermissions).toHaveBeenCalledWith(
-      SystemRoles.ADMIN,
-      expectedPermissionsForAdmin,
-      null,
-    );
+    for (const roleName of systemRoles) {
+      const expected = roleName === SystemRoles.ADMIN ? expectedPermissionsForAdmin : expectedPermissionsForUser;
+      expect(mockUpdateAccessPermissions).toHaveBeenCalledWith(roleName, expected, null);
+    }
   });
 
   it('should call updateAccessPermissions with role-specific defaults when permission types are not specified in config', async () => {

@@ -38,17 +38,35 @@ export default function ModelPanel({
         : (providerOption as StringOption | undefined)?.value;
     return value ?? '';
   }, [providerOption]);
-  const models = useMemo(
-    () => (provider ? (modelsData[provider] ?? []) : []),
-    [modelsData, provider],
-  );
+  const modelOptions = useMemo(() => {
+    if (!provider) {
+      return [] as Array<{ label: string; value: string }>;
+    }
+
+    const models = modelsData[provider] ?? [];
+
+    return models
+      .map((model) => {
+        if (typeof model === 'string') {
+          return { label: model, value: model };
+        }
+
+        return {
+          label: model.name ?? '',
+          value: model.name ?? '',
+        };
+      })
+      .filter((option) => option.value);
+  }, [modelsData, provider]);
+
+  const modelValues = useMemo(() => modelOptions.map((option) => option.value), [modelOptions]);
 
   useEffect(() => {
     const _model = model ?? '';
     if (provider && _model) {
-      const modelExists = models.includes(_model);
+      const modelExists = modelValues.includes(_model);
       if (!modelExists) {
-        const newModels = modelsData[provider] ?? [];
+        const newModels = modelValues;
         setValue('model', newModels[0] ?? '');
       }
       localStorage.setItem(LocalStorageKeys.LAST_AGENT_MODEL, _model);
@@ -56,9 +74,9 @@ export default function ModelPanel({
     }
 
     if (provider && !_model) {
-      setValue('model', models[0] ?? '');
+      setValue('model', modelValues[0] ?? '');
     }
-  }, [provider, models, modelsData, setValue, model]);
+  }, [provider, modelValues, modelsData, setValue, model]);
 
   const { data: endpointsConfig = {} } = useGetEndpointsQuery();
 
@@ -190,10 +208,7 @@ export default function ModelPanel({
                     }
                     searchPlaceholder={localize('com_ui_select_model')}
                     setValue={field.onChange}
-                    items={models.map((model) => ({
-                      label: model,
-                      value: model,
-                    }))}
+                    items={modelOptions}
                     disabled={!provider}
                     className={cn('disabled:opacity-50', error ? 'border-2 border-red-500' : '')}
                     ariaLabel={localize('com_ui_model')}

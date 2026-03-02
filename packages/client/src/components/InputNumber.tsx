@@ -13,7 +13,10 @@ import { cn } from '~/utils';
 const InputNumber = React.forwardRef<
   React.ElementRef<typeof RCInputNumber>,
   InputNumberPrimitive.InputNumberProps
->(({ className, ...props }, ref) => {
+>(({ className, placeholder, title, 'aria-label': ariaLabel, ...props }, ref) => {
+  const computedAriaLabel =
+    ariaLabel ?? (typeof placeholder === 'string' ? placeholder : undefined) ?? title;
+
   return (
     <RCInputNumber
       className={cn(
@@ -21,6 +24,8 @@ const InputNumber = React.forwardRef<
         className ?? '',
       )}
       ref={ref}
+      aria-label={computedAriaLabel}
+      placeholder={placeholder}
       {...props}
     />
   );

@@ -40,10 +40,31 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({
+    className,
+    variant,
+    size,
+    asChild = false,
+    children,
+    title,
+    'aria-label': ariaLabel,
+    ...props
+  }, ref) => {
     const Comp = asChild ? Slot : 'button';
+    const computedAriaLabel =
+      ariaLabel ?? (typeof title === 'string' ? title : undefined) ??
+      (typeof children === 'string' ? children : undefined);
+
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        aria-label={computedAriaLabel}
+        title={title}
+        {...props}
+      >
+        {children}
+      </Comp>
     );
   },
 );
